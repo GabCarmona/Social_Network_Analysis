@@ -36,7 +36,7 @@ Este projeto implementa um pipeline para processar tweets de datasets públicos,
 
 2.  **Clone o Repositório:**
     ```bash
-    git clone [https://github.com/AlexZhu777/analise_tweets_neo4j.git](https://github.com/AlexZhu777/analise_tweets_neo4j.git)
+    git clone [https://github.com/GabCarmona/Social_Network_Analysis.git](https://github.com/GabCarmona/Social_Network_Analysis.git)
     cd analise_tweets_neo4j
     ```
 
