@@ -11,11 +11,11 @@ Este projeto implementa um pipeline para processar tweets de datasets públicos,
     * Utilização da biblioteca NLTK com o léxico VADER para análise de sentimentos de tweets em inglês.
     * Classificação dos tweets como positivos, negativos ou neutros, com base em um score de sentimento composto.
 * **Construção do Grafo no Neo4j:**
-    * Criação de nós para `:Tweet`, `:User` (autores e mencionados) e `:Hashtag`.
-    * Estabelecimento de relacionamentos: `[:POSTED]`, `[:HAS_TAG]`, `[:MENTIONS]`.
+    * Criação de Nós: :Usuario, :Tweet, :Hashtag, :Midia (para imagens/vídeos), :Assunto.
+    * Estabelecimento de relacionamentos: [:POSTA], [:RETWEETA], [:REPLY_TO], [:SEGUE], [:POSSUI_HASHTAG], [:POSSUI_MIDIA], [:SOBRE].
 * **Pipeline de Duas Etapas:**
-    1.  **Ingestão:** População inicial do grafo com os dados estruturais dos tweets.
-    2.  **Enriquecimento:** Consulta dos dados já no grafo para realizar a análise de sentimento e atualizar os nós com essa nova informação.
+    1.  **Ingestão:** Script responsável por limpar o banco de dados, criar as constraints de unicidade e popular o grafo com todos os nós e relacionamentos estruturais a partir dos arquivos CSV.
+    2.  **Enriquecimento:** Após a criação do grafo base, este script consulta os tweets (em lotes, por intervalo de ID), realiza a análise de sentimento usando a biblioteca NLTK com o léxico VADER e atualiza os nós :Tweet com as novas informações (rótulo e score de sentimento).
 * **Consulta de Dados:** Script de exemplo para consultar os dados enriquecidos diretamente do Neo4j.
 
 ## Tecnologias Utilizadas
@@ -78,7 +78,7 @@ O projeto opera em um fluxo de múltiplas etapas, separando a carga dos dados da
 
 ### Passo 1: Preparar o Ambiente
 
-* Coloque o seu arquivo `.csv` na pasta `data/`.
+* Coloque os seus arquivos `.csv` na pasta `data/`.
 * Certifique-se de que o nome do arquivo corresponde ao valor de `DATASET_FILE_PATH` no seu arquivo `.env`.
 * Inicie sua instância do Neo4j e certifique-se de que as credenciais no `.env` estão corretas.
 * (Opcional, mas recomendado para uma nova carga) Limpe o banco de dados no Neo4j Browser: `MATCH (n) DETACH DELETE n`.
@@ -86,7 +86,7 @@ O projeto opera em um fluxo de múltiplas etapas, separando a carga dos dados da
 ### Passo 2: Executar o Pipeline
 
 1.  **Popular o Grafo (Carga Inicial):**
-    Este script lê o CSV e cria os nós `:Tweet`, `:User`, `:Hashtag` e seus relacionamentos, mas ainda **sem** os dados de sentimento.
+    Este script lê os arquivos CSV de entrada e cria a estrutura base do grafo, incluindo os nós :Usuario, :Tweet, :Hashtag, :Midia e :Assunto, bem como seus relacionamentos (:POSTA, :SEGUE, :RETWEETA, etc.). Esta fase é executada sem a inclusão dos dados de sentimento, que são adicionados posteriormente pelo segundo script.
     ```bash
     python 1_populate_graph.py
     ```
@@ -101,26 +101,22 @@ O projeto opera em um fluxo de múltiplas etapas, separando a carga dos dados da
 
 ### Passo 3: Consultar e Explorar os Resultados
 
-1.  **Consultar via Script Python:**
-    Use este script para executar uma query de exemplo e ver os resultados diretamente no terminal, formatados em uma tabela Pandas.
-    ```bash
-    python 3_query_sentiments.py
-    ```
-
-2.  **Explorar no Neo4j Browser:**
+1.  **Explorar no Neo4j Browser:**
     * Acesse seu Neo4j Browser (geralmente `http://localhost:7474`).
     * Execute queries Cypher para visualizar e analisar o grafo. Exemplos:
         * **Contar tweets por sentimento:**
             ```cypher
-            MATCH (t:Tweet)
-            WHERE t.sentimentLabel IS NOT NULL
-            RETURN t.sentimentLabel AS Sentimento, count(t) AS Quantidade
-            ORDER BY Quantidade DESC
+            MATCH (original:Tweet {id: 509000})
+            MATCH (resposta:Tweet)-[:REPLY_TO]->(original)
+            WHERE resposta.sentimentLabel IS NOT NULL
+            RETURN 
+               resposta.sentimentLabel AS Sentimento,
+              count(resposta) AS Quantidade_de_Respostas
             ```
-        * **Visualizar um subgrafo de tweets positivos e suas hashtags:**
+        * **Visualizar schema:**
             ```cypher
-            MATCH p=(t:Tweet {sentimentLabel: "positive"})-[:HAS_TAG]->(h:Hashtag)
-            RETURN p LIMIT 15
+            CALL db.schema.visualization()
+
             ```
 
 ---
