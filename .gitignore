@@ -1,0 +1,22 @@
+# analise_tweets_neo4j/.gitignore
+
+# Ambiente Virtual
+venv/
+.venv/
+*.pyc
+__pycache__/
+
+# Arquivo de variáveis de ambiente
+.env
+
+# Arquivos de IDEs (exemplos)
+.idea/
+.vscode/
+
+# Arquivos de datasets grandes (se você decidir não versioná-los)
+# data/*.csv
+# data/*.json
+# data/*.zip
+
+# Logs
+*.log
