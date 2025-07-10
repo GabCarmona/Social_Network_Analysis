@@ -2,6 +2,11 @@
 
 Este projeto implementa um pipeline para processar tweets de datasets públicos, realizar análise de sentimentos e armazenar os dados e seus relacionamentos em um banco de dados orientado a grafos Neo4j, permitindo análises complexas sobre a opinião pública.
 
+<p align="center">
+  <img width="487" height="516" alt="image" src="https://github.com/user-attachments/assets/649daebc-ba9d-47a3-9376-9d2f778ed053" />
+</p>
+
+
 ## Funcionalidades Implementadas
 
 * **Carregamento de Dados:** Leitura de tweets a partir de arquivos de dataset locais (CSV).
